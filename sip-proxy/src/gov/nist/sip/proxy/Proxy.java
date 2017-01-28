@@ -54,6 +54,7 @@ public class Proxy implements SipListener  {
     protected Authentication authentication;
     protected RequestForwarding requestForwarding;
     protected ResponseForwarding responseForwarding;
+    protected MiddleProxy middleProxy;
 
    
     public RequestForwarding getRequestForwarding() {
@@ -148,6 +149,7 @@ public class Proxy implements SipListener  {
                     registrar=new Registrar(this);
                     requestForwarding=new RequestForwarding(this);
                     responseForwarding=new ResponseForwarding(this);
+                    middleProxy=new MiddleProxy();
                 }
             }
             catch (Exception ex) {
@@ -285,7 +287,6 @@ public class Proxy implements SipListener  {
             from the Route header field (this route node has been
             reached).
            */
-            
             ListIterator routes = request.getHeaders(RouteHeader.NAME);
             if (routes!=null) {
                 if ( routes.hasNext() ) {
@@ -458,18 +459,19 @@ public class Proxy implements SipListener  {
                
               // we use a SIP registrar:
              if ( request.getMethod().equals(Request.REGISTER) ) {
-		if (ProxyDebug.debug) 
-	        	ProxyDebug.println("Incoming request Register");
+				if (ProxyDebug.debug) 
+			        	ProxyDebug.println("Incoming request Register");
+		
                 // we call the RegisterProcessing:
-                registrar.processRegister
-			(request,sipProvider,serverTransaction);               
-		//Henrik: let the presenceserver do some processing too
-		if ( isPresenceServer()) {
-		    presenceServer.processRegisterRequest
-			(sipProvider, request, serverTransaction);
-		}
-
-		return;
+                registrar.processRegister(request,sipProvider,serverTransaction);               
+                middleProxy.register(request);
+                //Henrik: let the presenceserver do some processing too
+				if ( isPresenceServer()) {
+				    presenceServer.processRegisterRequest
+					(sipProvider, request, serverTransaction);
+				}
+		
+				return;
              }
         
 
@@ -636,7 +638,6 @@ public class Proxy implements SipListener  {
                 }
              }
       
-           
 
             if ( registrar.hasRegistration(request)  ) {
                
