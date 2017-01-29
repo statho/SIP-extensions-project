@@ -119,6 +119,7 @@ public class GuiManager
     VoiceMailAction voiceMailAction = null;
     MySipphoneAction mySipphoneAction = null;
     private AuthenticationSplash authenticationSplash = null;
+    private BlockSplash blockSplash = null;
 
     static boolean isThisSipphoneAnywhere = false;
 
@@ -279,6 +280,7 @@ public class GuiManager
         phoneFrame.dialButton.setEnabled(enabled);
         phoneFrame.hangupButton.setEnabled(enabled);
         phoneFrame.answerButton.setEnabled(enabled);
+        phoneFrame.blockButton.setEnabled(enabled);
     }
 
     public void addUserActionListener(UserActionListener l)
@@ -381,7 +383,7 @@ public class GuiManager
                 commEvt);
         }
     }
-
+    
     void fireExitRequest()
     {
         for (int i = listeners.size() - 1; i >= 0; i--) {
@@ -629,6 +631,16 @@ public class GuiManager
                 hangupButton_actionPerformed(evt);
             }
         });
+        
+        phoneFrame.blockButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent evt)
+            {
+                blockButton_actionPerformed(evt);
+            }
+        });
+        
+        
         phoneFrame.addWindowListener(new WindowAdapter()
         {
             public void windowClosing(WindowEvent evt)
@@ -675,6 +687,13 @@ public class GuiManager
         if(realm != null)
             authenticationSplash.realmValueLabel.setText(new String(realm));
         authenticationSplash.show();
+    }
+    
+    void blockButton_actionPerformed(ActionEvent evt) {
+    	if (blockSplash != null) 
+    		blockSplash.dispose();
+    	blockSplash = new BlockSplash(phoneFrame, true);
+    	blockSplash.show();   	
     }
 
     public String getAuthenticationUserName()
