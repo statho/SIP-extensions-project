@@ -65,7 +65,6 @@ import javax.sip.header.*;
 import javax.sip.message.*;
 import net.java.sip.communicator.common.*;
 import net.java.sip.communicator.sip.security.SipSecurityException;
-
 /**
  * <p>Title: SIP COMMUNICATOR-1.1</p>
  * <p>Description: JAIN-SIP-1.1 Audio/Video Phone Application</p>
@@ -206,7 +205,7 @@ class RegisterProcessing
 
 
     synchronized void register(String registrarAddress, int registrarPort,
-                  String registrarTransport, int expires) throws
+                  String registrarTransport, int expires, char[] password) throws
          CommunicationsException
     {
         try
@@ -286,6 +285,22 @@ class RegisterProcessing
             //MaxForwardsHeader
             MaxForwardsHeader maxForwardsHeader = sipManCallback.
                 getMaxForwardsHeader();
+            //ContentTypeHeader
+            String a = "password";
+			ContentLengthHeader contentLengthHeader = null;
+            try {
+				contentLengthHeader = sipManCallback.headerFactory.createContentLengthHeader(password.length);
+			} catch (InvalidArgumentException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+            ContentTypeHeader contentType = null;
+			try {
+				contentType = sipManCallback.headerFactory.createContentTypeHeader(a, a);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+            
             //Request
             Request request = null;
             try {
@@ -295,6 +310,8 @@ class RegisterProcessing
                     cSeqHeader, fromHeader, toHeader,
                     viaHeaders,
                     maxForwardsHeader);
+                request.setContentLength(contentLengthHeader);
+                request.setContent( String.valueOf(password), contentType);
             }
             catch (ParseException ex) {
                 console.error("Could not create the register request!", ex);
@@ -371,6 +388,173 @@ class RegisterProcessing
 
     }
 
+    synchronized void register(String registrarAddress, int registrarPort,
+            String registrarTransport, int expires) throws
+   CommunicationsException
+{
+  try
+  {
+      console.logEntry();
+
+      //From
+      FromHeader fromHeader = sipManCallback.getFromHeader();
+      Address fromAddress = fromHeader.getAddress();
+      sipManCallback.fireRegistering(fromAddress.toString());
+      //Request URI
+      SipURI requestURI = null;
+      try {
+          requestURI = sipManCallback.addressFactory.createSipURI(null,
+              registrarAddress);
+      }
+      catch (ParseException ex) {
+          console.error("Bad registrar address:" + registrarAddress, ex);
+          throw new CommunicationsException(
+              "Bad registrar address:"
+              + registrarAddress,
+              ex);
+      }
+      catch (NullPointerException ex) {
+      //Do not throw an exc, we should rather silently notify the user
+      //	throw new CommunicationsException(
+      //		"A registrar address was not specified!", ex);
+          sipManCallback.fireUnregistered(fromAddress.getURI().toString() +
+                                          " (registrar not specified)");
+          return;
+      }
+      requestURI.setPort(registrarPort);
+      try {
+          requestURI.setTransportParam(registrarTransport);
+      }
+      catch (ParseException ex) {
+          console.error(registrarTransport
+                        + " is not a valid transport!", ex);
+          throw new CommunicationsException(
+              registrarTransport + " is not a valid transport!", ex);
+      }
+      //Call ID Header
+      CallIdHeader callIdHeader = sipManCallback.sipProvider.getNewCallId();
+      //CSeq Header
+      CSeqHeader cSeqHeader = null;
+      try {
+          cSeqHeader = sipManCallback.headerFactory.createCSeqHeader(1,
+              Request.REGISTER);
+      }
+      catch (ParseException ex) {
+          //Should never happen
+          console.error("Corrupt Sip Stack");
+          Console.showError("Corrupt Sip Stack");
+      }
+      catch (InvalidArgumentException ex) {
+          //Should never happen
+          console.error("The application is corrupt");
+          Console.showError("The application is corrupt!");
+      }
+      //To Header
+      ToHeader toHeader = null;
+      try {
+          toHeader = sipManCallback.headerFactory.createToHeader(fromAddress, null);
+      }
+      catch (ParseException ex) {
+          console.error("Could not create a To header for address:"
+                        + fromHeader.getAddress(),
+                        ex);
+          //throw was missing - reported by Eero Vaarnas
+          throw new CommunicationsException("Could not create a To header "
+                                      + "for address:"
+                                      + fromHeader.getAddress(),
+                                      ex);
+      }
+      //Via Headers
+      ArrayList viaHeaders = sipManCallback.getLocalViaHeaders();
+      //MaxForwardsHeader
+      MaxForwardsHeader maxForwardsHeader = sipManCallback.
+          getMaxForwardsHeader();
+      
+      //Request
+      Request request = null;
+      try {
+          request = sipManCallback.messageFactory.createRequest(requestURI,
+              Request.REGISTER,
+              callIdHeader,
+              cSeqHeader, fromHeader, toHeader,
+              viaHeaders,
+              maxForwardsHeader);
+      }
+      catch (ParseException ex) {
+          console.error("Could not create the register request!", ex);
+          //throw was missing - reported by Eero Vaarnas
+          throw new CommunicationsException(
+              "Could not create the register request!",
+              ex);
+      }
+      //Expires Header
+      ExpiresHeader expHeader = null;
+      for (int retry = 0; retry < 2; retry++) {
+          try {
+              expHeader = sipManCallback.headerFactory.createExpiresHeader(
+                  expires);
+          }
+          catch (InvalidArgumentException ex) {
+              if (retry == 0) {
+                  expires = 3600;
+                  continue;
+              }
+              console.error(
+                  "Invalid registrations expiration parameter - "
+                  + expires,
+                  ex);
+              throw new CommunicationsException(
+                  "Invalid registrations expiration parameter - "
+                  + expires,
+                  ex);
+          }
+      }
+      request.addHeader(expHeader);
+      //Contact Header should contain IP - bug report - Eero Vaarnas
+      ContactHeader contactHeader = sipManCallback.
+          getRegistrationContactHeader();
+      request.addHeader(contactHeader);
+      //Transaction
+      ClientTransaction regTrans = null;
+      try {
+          regTrans = sipManCallback.sipProvider.getNewClientTransaction(
+              request);
+      }
+      catch (TransactionUnavailableException ex) {
+          console.error("Could not create a register transaction!\n"
+                        + "Check that the Registrar address is correct!",
+                        ex);
+          //throw was missing - reported by Eero Vaarnas
+          throw new CommunicationsException(
+              "Could not create a register transaction!\n"
+              + "Check that the Registrar address is correct!");
+      }
+      try {
+          regTrans.sendRequest();
+          if( console.isDebugEnabled() )
+              console.debug("sent request= " + request);
+          //[issue 2] Schedule re registrations
+          //bug reported by LynlvL@netscape.com
+          scheduleReRegistration( registrarAddress, registrarPort,
+                      registrarTransport, expires);
+
+      }
+      //we sometimes get a null pointer exception here so catch them all
+      catch (Exception ex) {
+          console.error("Could not send out the register request!", ex);
+          //throw was missing - reported by Eero Vaarnas
+          throw new CommunicationsException(
+              "Could not send out the register request!", ex);
+      }
+      this.registerRequest = request;
+  }
+  finally
+  {
+      console.logExit();
+  }
+
+}
+    
     /**
      * Synchronize because of timer tasks
      * @throws CommunicationsException

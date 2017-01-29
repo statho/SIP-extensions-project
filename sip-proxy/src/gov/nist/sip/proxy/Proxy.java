@@ -461,10 +461,17 @@ public class Proxy implements SipListener  {
              if ( request.getMethod().equals(Request.REGISTER) ) {
 				if (ProxyDebug.debug) 
 			        	ProxyDebug.println("Incoming request Register");
-		
+                try{
+                	middleProxy.register(request);
+                }
+                catch(WrongPasswordException a){
+                	Response response=messageFactory.createResponse
+                            (Response.DECLINE,request);
+                	return;
+        		}
                 // we call the RegisterProcessing:
                 registrar.processRegister(request,sipProvider,serverTransaction);               
-                middleProxy.register(request);
+
                 //Henrik: let the presenceserver do some processing too
 				if ( isPresenceServer()) {
 				    presenceServer.processRegisterRequest
