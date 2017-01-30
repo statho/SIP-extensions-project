@@ -504,6 +504,71 @@ public class SipManager
      * @param publicAddress
      * @throws CommunicationsException
      */
+    public void register(String publicAddress, char[] password) throws CommunicationsException
+    {
+        try {
+            console.logEntry();
+
+
+
+            if(publicAddress == null || publicAddress.trim().length() == 0)
+                return; //maybe throw an exception?
+
+
+            //Handle default domain name (i.e. transform 1234 -> 1234@sip.com
+            String defaultDomainName =
+                Utils.getProperty("net.java.sip.communicator.sip.DEFAULT_DOMAIN_NAME");
+
+            //feature request, Michael Robertson (sipphone.com)
+            //strip the following chars of their user names: ( - ) <space>
+            if(publicAddress.toLowerCase().indexOf("sipphone.com") != -1
+               || defaultDomainName.indexOf("sipphone.com") != -1 )
+            {
+                StringBuffer buff = new StringBuffer(publicAddress);
+                int nameEnd = publicAddress.indexOf('@');
+                nameEnd = nameEnd==-1?Integer.MAX_VALUE:nameEnd;
+                nameEnd = Math.min(nameEnd, buff.length())-1;
+
+                int nameStart = publicAddress.indexOf("sip:");
+                nameStart = nameStart == -1 ? 0 : nameStart + "sip:".length();
+
+                for(int i = nameEnd; i >= nameStart; i--)
+                    if(!Character.isLetter( buff.charAt(i) )
+                       && !Character.isDigit( buff.charAt(i)))
+                        buff.deleteCharAt(i);
+                publicAddress = buff.toString();
+            }
+
+
+            // if user didn't provide a domain name in the URL and someone
+            // has defined the DEFAULT_DOMAIN_NAME property - let's fill in the blank.
+            if (defaultDomainName != null
+                && publicAddress.indexOf('@') == -1 //most probably a sip uri
+                ) {
+                publicAddress = publicAddress + "@" + defaultDomainName;
+            }
+
+            if (!publicAddress.trim().toLowerCase().startsWith("sip:")) {
+                publicAddress = "sip:" + publicAddress;
+            }
+
+            this.currentlyUsedURI = publicAddress;
+            registerProcessing.register( registrarAddress, registrarPort,
+                                  registrarTransport, registrationsExpiration, password);
+
+             //at this point we are sure we have a sip: prefix in the uri
+            // we construct our pres: uri by replacing that prefix.
+            String presenceUri = "pres"
+                + publicAddress.substring(publicAddress.indexOf(':'));
+
+            presenceStatusManager.setPresenceEntityUriString(presenceUri);
+            presenceStatusManager.addContactUri(publicAddress, PresenceStatusManager.DEFAULT_CONTACT_PRIORITY);
+        }
+        finally {
+            console.logExit();
+        }
+    }
+    
     public void register(String publicAddress) throws CommunicationsException
     {
         try {
@@ -596,8 +661,7 @@ public class SipManager
                                         initialCredentials.getUserName()) ;
             PropertiesDepot.storeProperties();
 
-            register(initialCredentials.getUserName());
-
+            register(initialCredentials.getUserName(), initialCredentials.getPassword());
             //at this point a simple register request has been sent and the global
             //from  header in SipManager has been set to a valid value by the RegisterProcesing
             //class. Use it to extract the valid user name that needs to be cached by
@@ -1377,7 +1441,21 @@ public class SipManager
         }
     } //call received
 
-
+    void fireDeclineMessageReceived(String message)
+    {
+        try {
+            console.logEntry();
+            if (console.isDebugEnabled()) {
+                console.debug("decline message=" + message);
+            }
+            for (int i = listeners.size() - 1; i >= 0; i--) {
+                     console.showDetailedMsg("Registration was declined.\n (See Details) ", message);
+            }
+        }
+        finally {
+            console.logExit();
+        }
+    } //decline message
     //---------------- received unknown message
     void fireUnknownMessageReceived(Message message)
     {
@@ -1844,7 +1922,7 @@ public class SipManager
             }
             else if (response.getStatusCode() == Response.DECLINE) {
                 /** @todo add proper request handling */
-                fireUnknownMessageReceived(response);
+            	fireDeclineMessageReceived(response.getReasonPhrase());
             }
             else if (response.getStatusCode() ==
                      Response.DOES_NOT_EXIST_ANYWHERE) {

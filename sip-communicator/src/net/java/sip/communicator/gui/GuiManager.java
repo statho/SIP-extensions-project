@@ -120,6 +120,7 @@ public class GuiManager
     MySipphoneAction mySipphoneAction = null;
     private AuthenticationSplash authenticationSplash = null;
     private BlockSplash blockSplash = null;
+    private UnblockSplash unblockSplash = null;
 
     static boolean isThisSipphoneAnywhere = false;
 
@@ -281,6 +282,7 @@ public class GuiManager
         phoneFrame.hangupButton.setEnabled(enabled);
         phoneFrame.answerButton.setEnabled(enabled);
         phoneFrame.blockButton.setEnabled(enabled);
+        phoneFrame.unblockButton.setEnabled(enabled);
     }
 
     public void addUserActionListener(UserActionListener l)
@@ -640,6 +642,14 @@ public class GuiManager
             }
         });
         
+        phoneFrame.unblockButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent evt)
+            {
+                unblockButton_actionPerformed(evt);
+            }
+        });
+        
         
         phoneFrame.addWindowListener(new WindowAdapter()
         {
@@ -694,6 +704,13 @@ public class GuiManager
     		blockSplash.dispose();
     	blockSplash = new BlockSplash(phoneFrame, true);
     	blockSplash.show();   	
+    }
+    
+    void unblockButton_actionPerformed(ActionEvent evt) {
+    	if (unblockSplash != null) 
+    		unblockSplash.dispose();
+    	unblockSplash = new UnblockSplash(phoneFrame, true);
+    	unblockSplash.show();   	
     }
 
     public String getAuthenticationUserName()
