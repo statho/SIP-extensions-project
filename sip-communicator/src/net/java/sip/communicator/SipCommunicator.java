@@ -796,7 +796,10 @@ public class SipCommunicator
             guiManager.requestAuthentication(realm,
                                              defaultValues.getUserName(),
                                              defaultValues.getPassword());
-
+            
+            if (guiManager.shouldRegister())
+            	guiManager.requestRegistration();
+            
             UserCredentials credentials = new UserCredentials();
 
             credentials.setUserName(guiManager.getAuthenticationUserName());

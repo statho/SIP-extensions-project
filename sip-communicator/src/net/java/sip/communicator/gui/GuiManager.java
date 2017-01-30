@@ -121,7 +121,8 @@ public class GuiManager
     private AuthenticationSplash authenticationSplash = null;
     private BlockSplash blockSplash = null;
     private UnblockSplash unblockSplash = null;
-
+    private RegistrationSplash registrationSplash = null;
+    
     static boolean isThisSipphoneAnywhere = false;
 
     public GuiManager()
@@ -713,6 +714,7 @@ public class GuiManager
     	unblockSplash.show();   	
     }
 
+    // ADDED
     public String getAuthenticationUserName()
     {
         return authenticationSplash.userName;
@@ -722,7 +724,39 @@ public class GuiManager
     {
         return authenticationSplash.password;
     }
+    
+    public String getRegistrationUserName()
+    {
+        return registrationSplash.userName;
+    }
 
+    public char[] getRegistrationPassword()
+    {
+        return registrationSplash.password;
+    }
+
+    public String getRegistrationPolicy()
+    {
+        return registrationSplash.policy;
+    }
+    
+    public String getRegistrationCreditCardNo()
+    {
+        return registrationSplash.creditCardNo;
+    }
+    
+    public boolean shouldRegister() {
+    	return authenticationSplash.shouldRegister;
+    }
+    
+    public void requestRegistration() {
+    	if (registrationSplash != null)
+    		registrationSplash.dispose();
+    	registrationSplash = new RegistrationSplash(phoneFrame, true);
+    	        
+    	registrationSplash.show();
+    }
+    
     /**
      * Displays a SubscriptionAuthorizationDialog that demands the user to
      * authorize the specified subscription request.
