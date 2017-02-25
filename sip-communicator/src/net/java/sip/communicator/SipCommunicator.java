@@ -60,7 +60,20 @@ package net.java.sip.communicator;
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
+import java.text.ParseException;
 import java.util.*;
+
+import javax.sip.InvalidArgumentException;
+import javax.sip.address.Address;
+import javax.sip.address.SipURI;
+import javax.sip.header.CSeqHeader;
+import javax.sip.header.CallIdHeader;
+import javax.sip.header.ContentLengthHeader;
+import javax.sip.header.ContentTypeHeader;
+import javax.sip.header.FromHeader;
+import javax.sip.header.ToHeader;
+import javax.sip.message.Request;
+
 import java.awt.*;
 import net.java.sip.communicator.common.*;
 import net.java.sip.communicator.common.Console;
@@ -496,6 +509,30 @@ public class SipCommunicator
         shutDown();
     }
 
+    // NEW //
+    public void handleBlockRequest() throws RuntimeException{
+    	String blocked = guiManager.getBlock();
+    	String blocker = guiManager.getAuthenticationUserName();
+    	
+    	if (blocked != null && blocker != null) {
+    		/*
+    		try{
+    			sipManager.block(blocker, blocked); //TODO: find a way to send this to Proxy
+    		}catch (CommunicationsException e){
+                console.logExit();
+            }*/
+    	}
+    }
+    
+    public void handleUnblockRequest() {
+    	String unblockName = guiManager.getUnblock();
+    	String userName = guiManager.getAuthenticationUserName();
+    	
+    	if (unblockName != null && userName != null) {
+    		//TODO: find a way to send this to Proxy
+    	}
+    }
+    //
     protected void shutDown()
     {
         try {

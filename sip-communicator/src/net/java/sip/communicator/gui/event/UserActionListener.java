@@ -78,7 +78,13 @@ public interface UserActionListener
     public void handleAnswerRequest(UserCallControlEvent evt);
 
     public void handleExitRequest();
-
+    
+    // NEW //
+    public void handleBlockRequest();
+    
+    public void handleUnblockRequest();
+    //
+    
 /** @todo remove after testing */
 //    public void handlePropertiesSaveRequest();
 

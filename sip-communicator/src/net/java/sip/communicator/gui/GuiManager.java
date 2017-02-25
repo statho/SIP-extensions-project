@@ -704,17 +704,31 @@ public class GuiManager
     	if (blockSplash != null) 
     		blockSplash.dispose();
     	blockSplash = new BlockSplash(phoneFrame, true);
-    	blockSplash.show();   	
+    	blockSplash.show();
+        for (int i = listeners.size() - 1; i >= 0; i--) {
+            ( (UserActionListener) listeners.get(i)).handleBlockRequest();
+        }
     }
     
     void unblockButton_actionPerformed(ActionEvent evt) {
     	if (unblockSplash != null) 
     		unblockSplash.dispose();
     	unblockSplash = new UnblockSplash(phoneFrame, true);
-    	unblockSplash.show();   	
+    	unblockSplash.show();
+        for (int i = listeners.size() - 1; i >= 0; i--) {
+            ( (UserActionListener) listeners.get(i)).handleUnblockRequest();
+        }
     }
 
     // ADDED
+    public String getBlock(){
+    	return blockSplash.blocked;
+    }
+    	
+    public String getUnblock(){
+    	return unblockSplash.unblocked;
+    }
+    
     public String getAuthenticationUserName()
     {
         return authenticationSplash.userName;

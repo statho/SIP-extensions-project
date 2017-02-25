@@ -480,6 +480,21 @@ public class Proxy implements SipListener  {
 		
 				return;
              }
+             
+             if ( request.getMethod().equals(Request.NOTIFY) ) {	//TODO: create a request for this
+				if (ProxyDebug.debug) 
+			        	ProxyDebug.println("Incoming request Block");
+                try{
+                	middleProxy.block(request);
+                }
+                catch(WrongUserException a){
+                	Response response=messageFactory.createResponse
+                            (Response.DECLINE,request);
+                	return;
+        		}
+		
+				return;
+             }
         
 
 
@@ -575,8 +590,16 @@ public class Proxy implements SipListener  {
 		return;
 	    }
 
-		
-
+	    //NEW: Blocking check and response
+	    boolean isBlocked = middleProxy.checkIfBlock(request);
+	    if (isBlocked) {
+	    	Response response = messageFactory.createResponse(Response.BUSY_HERE, request);	//callee appears unavailable
+	    	if (serverTransaction != null)
+				serverTransaction.sendResponse(response);
+			else
+				sipProvider.sendResponse(response);
+	    	return;
+	    }
 
 	
 	     // Forward to next hop but dont reply OK right away for the

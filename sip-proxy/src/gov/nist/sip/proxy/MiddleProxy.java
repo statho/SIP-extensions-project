@@ -2,6 +2,7 @@ package gov.nist.sip.proxy;
 
 import java.sql.Connection;
 
+import java.text.ParseException;
 import javax.sip.*;
 import javax.sip.message.*;
 import javax.sip.header.*;
@@ -11,7 +12,7 @@ import gov.nist.javax.sip.parser.URLParser;
 public class MiddleProxy {
 	//protected ForwardingServer forwardingServer;
 	//protected BillingServer billingServer;
-	//protected BlockingServer blockingServer;
+	protected BlockingServer blockingServer;
 	protected User user;
 	protected Database db;
 	
@@ -19,7 +20,7 @@ public class MiddleProxy {
 		db=new Database();
 		//forwardingServer=new ForwardingServer();
 		//billingServer=new BillingServer();
-		//blockingServer=new BlockingServer();
+		blockingServer= new BlockingServer(db);
 	}
 	
 	public static URI getSourceUri(Request request) {
@@ -46,4 +47,45 @@ public class MiddleProxy {
 		}
 	}
 	
+	public void block(Request request) throws WrongUserException{
+		String sourceUri = getSourceUri(request).toString();
+		String blocker = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		String targetUri = getTargetUri(request).toString();
+		String blocked = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		boolean isBlocked = blockingServer.getBlock(blocker, blocked);
+		try {
+			blockingServer.BlockUser(blocker, blocked);
+		}
+		catch(WrongUserException a){
+			System.out.println(a.getMessage());
+			throw a;
+		}
+	}
+	
+	public void unblock(Request request) throws WrongUserException{
+		String sourceUri = getSourceUri(request).toString();
+		String blocker = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		String targetUri = getTargetUri(request).toString();
+		String blocked = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		try {
+			blockingServer.UnblockUser(blocker, blocked);
+		}
+		catch(WrongUserException a){
+			System.out.println(a.getMessage());
+			throw a;
+		}
+	}
+	
+	public boolean checkIfBlock(Request request) {
+		String sourceUri = getSourceUri(request).toString();
+		String blocked = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		String targetUri = getTargetUri(request).toString();
+		String blocker = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		
+		boolean isBlocked = blockingServer.getBlock(blocker, blocked);
+		if (isBlocked) {
+			return true;
+		} 
+		else return false;
+	}
 }
