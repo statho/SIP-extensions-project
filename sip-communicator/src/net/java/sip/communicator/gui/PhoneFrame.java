@@ -118,6 +118,8 @@ class PhoneFrame
     JComboBox contactBox = new JComboBox();
     JButton blockButton = new JButton();
     JButton unblockButton = new JButton();
+    JButton forwardButton = new JButton();
+
     
 
     public PhoneFrame(GuiManager guiManCallback) //throws HeadlessException
@@ -186,6 +188,9 @@ class PhoneFrame
         blockButton.setEnabled(false);
         blockButton.setMnemonic('B');
         blockButton.setText("Block");
+        forwardButton.setEnabled(false);
+        forwardButton.setMnemonic('F');
+        forwardButton.setText("Forward");
         unblockButton.setEnabled(false);
         unblockButton.setMnemonic('U');
         unblockButton.setText("Unblock");
@@ -232,6 +237,7 @@ class PhoneFrame
         callControlButtons.add(hangupButton, null);
         callControlButtons.add(blockButton, null);
         callControlButtons.add(unblockButton, null);
+        callControlButtons.add(forwardButton, null);
         controlPanel.add(participantsScroll,  BorderLayout.CENTER);
         participantsScroll.setViewportView(participantsTable);
         statusPanel.add(registrationLabel, BorderLayout.WEST);

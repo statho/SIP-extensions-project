@@ -120,6 +120,7 @@ public class GuiManager
     MySipphoneAction mySipphoneAction = null;
     private AuthenticationSplash authenticationSplash = null;
     private BlockSplash blockSplash = null;
+    private ForwardSplash forwardSplash = null;
     private UnblockSplash unblockSplash = null;
     private RegistrationSplash registrationSplash = null;
     
@@ -284,6 +285,7 @@ public class GuiManager
         phoneFrame.answerButton.setEnabled(enabled);
         phoneFrame.blockButton.setEnabled(enabled);
         phoneFrame.unblockButton.setEnabled(enabled);
+        phoneFrame.forwardButton.setEnabled(enabled);
     }
 
     public void addUserActionListener(UserActionListener l)
@@ -651,6 +653,13 @@ public class GuiManager
             }
         });
         
+        phoneFrame.forwardButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent evt)
+            {
+                forwardButton_actionPerformed(evt);
+            }
+        });
         
         phoneFrame.addWindowListener(new WindowAdapter()
         {
@@ -705,6 +714,15 @@ public class GuiManager
     		blockSplash.dispose();
     	blockSplash = new BlockSplash(phoneFrame, true);
     	blockSplash.show();
+        for (int i = listeners.size() - 1; i >= 0; i--) {
+            ( (UserActionListener) listeners.get(i)).handleBlockRequest();
+        }
+    }
+    void forwardButton_actionPerformed(ActionEvent evt) {
+    	if (forwardSplash != null) 
+    		forwardSplash.dispose();
+    	forwardSplash = new ForwardSplash(phoneFrame, true);
+    	forwardSplash.show();
         for (int i = listeners.size() - 1; i >= 0; i--) {
             ( (UserActionListener) listeners.get(i)).handleBlockRequest();
         }
