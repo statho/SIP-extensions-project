@@ -781,11 +781,20 @@ public class GuiManager
     	return authenticationSplash.shouldRegister;
     }
     
-    public void requestRegistration() {
+    public void requestRegistration(String realm, String userName, char[] password) {
     	if (registrationSplash != null)
     		registrationSplash.dispose();
     	registrationSplash = new RegistrationSplash(phoneFrame, true);
-    	        
+    
+    	if(userName != null)
+            authenticationSplash.userNameTextField.setText(userName);
+        if(password != null)
+            authenticationSplash.passwordTextField.setText(new String(password));
+        //Set a relevant realm value
+        //Bug report by Steven Lass (sltemp at comcast.net)
+        if(realm != null)
+            authenticationSplash.realmValueLabel.setText(new String(realm));            	
+    	
     	registrationSplash.show();
     }
     

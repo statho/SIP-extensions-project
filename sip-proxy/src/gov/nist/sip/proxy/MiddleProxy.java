@@ -33,13 +33,28 @@ public class MiddleProxy {
 		return header.getAddress().getURI();
 	}
 	
-	public void register(Request request) throws WrongPasswordException{
+	public boolean containsChar(String s, char search) {
+	    if (s.length() == 0)
+	        return false;
+	    else
+	        return s.charAt(0) == search || containsChar(s.substring(1), search);
+	}
+	
+	public void register(Request request) throws WrongPasswordException, NotUserException{
 		String sourceUri = getSourceUri(request).toString();
 		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
 		byte[] temp = request.getRawContent();
-		String password = new String(temp);
+		String password = new String(temp);		
 		try {
-			User user = new User(source, password, db);
+			User user;
+			if(containsChar(password,"|".charAt(0))){
+				String passwd = password.substring(0, password.indexOf("|"));
+				String policy = password.substring(password.indexOf("|")+1, password.lastIndexOf("|"));
+				String creditCardNo = password.substring(password.lastIndexOf("|")+1);
+				user = new User(source, passwd, policy, creditCardNo, db);
+			}
+			else
+				user = new User(source, password, db);
 		}
 		catch(WrongPasswordException a){
 			System.out.println(a.getMessage());

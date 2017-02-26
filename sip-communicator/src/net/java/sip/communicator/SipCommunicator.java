@@ -834,14 +834,22 @@ public class SipCommunicator
                                              defaultValues.getUserName(),
                                              defaultValues.getPassword());
             
-            if (guiManager.shouldRegister())
-            	guiManager.requestRegistration();
-            
             UserCredentials credentials = new UserCredentials();
-
-            credentials.setUserName(guiManager.getAuthenticationUserName());
-            credentials.setPassword(guiManager.getAuthenticationPassword());
-
+            
+            if (guiManager.shouldRegister()){
+            	guiManager.requestRegistration(realm, defaultValues.getUserName(), defaultValues.getPassword());
+            	
+            	String str = String.valueOf(guiManager.getRegistrationPassword()) + "|" 
+            					+ guiManager.getRegistrationPolicy() + "|" + guiManager.getRegistrationCreditCardNo();
+            	
+            	credentials.setUserName(guiManager.getRegistrationUserName());
+            	credentials.setPassword(str.toCharArray());
+            }
+            else{
+            	credentials.setUserName(guiManager.getAuthenticationUserName());
+            	credentials.setPassword(guiManager.getAuthenticationPassword());
+            }
+            
             return credentials;
         }
         finally
