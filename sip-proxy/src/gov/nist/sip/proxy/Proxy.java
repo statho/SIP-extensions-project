@@ -469,6 +469,11 @@ public class Proxy implements SipListener  {
                             (Response.DECLINE,request);
                 	return;
         		}
+                catch(NotUserException a){
+                	Response response=messageFactory.createResponse
+                            (Response.DECLINE,request);
+                	return;
+        		}
                 // we call the RegisterProcessing:
                 registrar.processRegister(request,sipProvider,serverTransaction);               
 

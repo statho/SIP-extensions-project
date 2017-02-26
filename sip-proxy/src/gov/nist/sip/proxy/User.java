@@ -46,7 +46,7 @@ public class User {
 					throw new WrongPasswordException("User: " + username + " used wrong password: " + password + ".");
 			}
 			else
-				throw new NotUserException(username + " does not correspond to a user.");
+				throw new NotUserException("Username: "+username + " does not correspond to a user.");
 			
 		
 		}

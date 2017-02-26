@@ -60,6 +60,10 @@ public class MiddleProxy {
 			System.out.println(a.getMessage());
 			throw a;
 		}
+		catch(NotUserException a){
+			System.out.println(a.getMessage());
+			throw a;
+		}
 	}
 	
 	public void block(Request request) throws WrongUserException{
