@@ -65,8 +65,8 @@ public class MiddleProxy {
 	public void block(Request request) throws WrongUserException{
 		String sourceUri = getSourceUri(request).toString();
 		String blocker = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
-		String targetUri = getTargetUri(request).toString();
-		String blocked = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		byte[] temp = request.getRawContent();
+		String blocked = new String(temp);	
 		boolean isBlocked = blockingServer.getBlock(blocker, blocked);
 		try {
 			blockingServer.BlockUser(blocker, blocked);

@@ -515,12 +515,11 @@ public class SipCommunicator
     	String blocker = guiManager.getAuthenticationUserName();
     	
     	if (blocked != null && blocker != null) {
-    		/*
     		try{
-    			sipManager.block(blocker, blocked); //TODO: find a way to send this to Proxy
+    			sipManager.block(blocker, blocked, true); //TODO: find a way to send this to Proxy
     		}catch (CommunicationsException e){
                 console.logExit();
-            }*/
+            }
     	}
     }
     
