@@ -761,12 +761,12 @@ public class SipManager
                     request);
             }
             catch (TransactionUnavailableException ex) {
-                console.error("Could not create a register transaction!\n"
+                console.error("Could not create a blocking transaction!\n"
                               + "Check that the Registrar address is correct!",
                               ex);
                 //throw was missing - reported by Eero Vaarnas
                 throw new CommunicationsException(
-                    "Could not create a register transaction!\n"
+                    "Could not create a blocking transaction!\n"
                     + "Check that the Registrar address is correct!");
             }
             try {
@@ -781,7 +781,7 @@ public class SipManager
             }
             //we sometimes get a null pointer exception here so catch them all
             catch (Exception ex) {
-                console.error("Could not send out the register request!", ex);
+                console.error("Could not send out the blocking request!", ex);
                 //throw was missing - reported by Eero Vaarnas
                 throw new CommunicationsException(
                     "Could not send out the register request!", ex);

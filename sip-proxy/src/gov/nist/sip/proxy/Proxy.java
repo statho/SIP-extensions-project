@@ -497,7 +497,12 @@ public class Proxy implements SipListener  {
                             (Response.DECLINE,request);
                 	return;
         		}
-		
+                Response response = messageFactory.createResponse(
+                	Response.OK, request);
+                if (serverTransaction != null)
+                	serverTransaction.sendResponse(response);
+                else
+                	sipProvider.sendResponse(response);
 				return;
              }
         
