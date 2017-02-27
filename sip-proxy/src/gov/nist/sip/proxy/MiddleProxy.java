@@ -42,7 +42,7 @@ public class MiddleProxy {
 	        return s.charAt(0) == search || containsChar(s.substring(1), search);
 	}
 	
-	public void register(Request request) throws WrongPasswordException, NotUserException{
+	public void register(Request request) throws RegistrationException{
 		String sourceUri = getSourceUri(request).toString();
 		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
 		byte[] temp = request.getRawContent();

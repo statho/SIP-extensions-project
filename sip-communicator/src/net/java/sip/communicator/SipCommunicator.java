@@ -486,7 +486,7 @@ public class SipCommunicator implements MediaListener, UserActionListener, Commu
 			sipManager.forward(source, target);
 			
 			}catch (CommunicationsException e) {
-			console.logExit();
+				console.logExit();
 		}
 	}
 	}

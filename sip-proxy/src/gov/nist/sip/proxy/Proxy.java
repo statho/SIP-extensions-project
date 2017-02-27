@@ -500,6 +500,7 @@ public class Proxy implements SipListener  {
                 catch(WrongUserException a){
                 	Response response=messageFactory.createResponse
                             (Response.BAD_REQUEST,request);
+                	response.setReasonPhrase(a.getMessage());
                     if (serverTransaction != null)
                     	serverTransaction.sendResponse(response);
                     else
@@ -523,8 +524,13 @@ public class Proxy implements SipListener  {
                  }
                  catch(WrongUserException2 a){
                  	Response response=messageFactory.createResponse
-                             (Response.DECLINE,request);
-                 	return;
+                             (Response.BAD_REQUEST,request);
+                 	response.setReasonPhrase(a.getMessage());
+                 	if (serverTransaction != null)
+                    	serverTransaction.sendResponse(response);
+                    else
+                    	sipProvider.sendResponse(response);
+                	return;
          		}
                 Response response = messageFactory.createResponse(Response.OK, request);
                 if (serverTransaction != null)
@@ -542,8 +548,13 @@ public class Proxy implements SipListener  {
                   }
                   catch(WrongUserException2 a){
                   	Response response=messageFactory.createResponse
-                              (Response.DECLINE,request);
-                  	return;
+                              (Response.BAD_REQUEST,request);
+    	    		response.setReasonPhrase(a.getMessage());
+                  	if (serverTransaction != null)
+        				serverTransaction.sendResponse(response);
+        			else
+        				sipProvider.sendResponse(response);
+     				return;
           		}
                  Response response = messageFactory.createResponse(Response.OK, request);
                  if (serverTransaction != null)
@@ -657,12 +668,28 @@ public class Proxy implements SipListener  {
 				sipProvider.sendResponse(response);
 	    	return;
 	    }
-	    
+// NEW: forwarding check and response	    
 	    Request request2 = middleProxy.checkAndSetForwarding(request, this);
 	    isBlocked = middleProxy.checkIfBlock(request2);
-	    while(middleProxy.findWhereIsForwarded(request2) != null && isBlocked==false ){
+	    
+	    ArrayList<String> forward_list = new ArrayList<String>();
+	    String forward_dest = middleProxy.findWhereIsForwarded(request2);
+	    while(forward_dest != null && isBlocked==false ){
+	    	forward_dest = middleProxy.findWhereIsForwarded(request2);
+	    	if (forward_list.contains(forward_dest)){
+	    		Response response = messageFactory.createResponse(Response.BAD_REQUEST, request2);	//callee appears unavailable
+	    		response.setReasonPhrase("Cycle detected.");
+	    		if (serverTransaction != null)
+					serverTransaction.sendResponse(response);
+				else
+					sipProvider.sendResponse(response);
+		    	return;
+	    	}
+	    	else{
+	    	forward_list.add(forward_dest);
 	    	request2 = middleProxy.checkAndSetForwarding(request2, this);
 		    isBlocked = middleProxy.checkIfBlock(request2);   	
+	    	}
 	    }
 	    if (isBlocked) {
 	    	Response response = messageFactory.createResponse(Response.BUSY_HERE, request2);	//callee appears unavailable

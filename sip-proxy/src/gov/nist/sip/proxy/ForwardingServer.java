@@ -25,7 +25,7 @@ public class ForwardingServer {
 		
 		try {
 			PreparedStatement prep = conn.prepareStatement(existingUser);
-			prep.setString(1, source);
+			prep.setString(1, target);
 			ResultSet rs = prep.executeQuery();
 			
 			boolean exists = rs.next();
@@ -54,7 +54,7 @@ public class ForwardingServer {
 				}
 				}
 			else {
-				throw new WrongUserException2("User: " + source + " does not exist.");
+				throw new WrongUserException2("User: " + target + " does not exist.");
 			}
 		}
 		catch (SQLException e) {
@@ -68,7 +68,7 @@ public class ForwardingServer {
 		
 		try {
 			PreparedStatement prep = conn.prepareStatement(existingUser);
-			prep.setString(1, source);
+			prep.setString(1, target);
 			ResultSet rs = prep.executeQuery();
 			
 			boolean exists = rs.next();
@@ -82,7 +82,7 @@ public class ForwardingServer {
 					prep.executeUpdate();
 					}
 			else {
-				throw new WrongUserException2("User: " + source + " does not exist.");
+				throw new WrongUserException2("User: " + target + " does not exist.");
 			}
 		}
 		catch (SQLException e) {

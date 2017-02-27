@@ -125,7 +125,7 @@ public class UnforwardSplash
         unforwardLabel.setLabelFor(unforwardTextField);
 
 
-        String unforwardFromLabelValue = "Unforward :";
+        String unforwardFromLabelValue = "Unforward from:";
         
       
 
