@@ -1,0 +1,1 @@
+In this project, we extended some fuctionalities of the SIP Proxy and SIP Communicator.
