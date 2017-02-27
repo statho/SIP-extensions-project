@@ -633,18 +633,21 @@ public class Proxy implements SipListener  {
 	    	return;
 	    }
 	    
-	    request = middleProxy.checkAndSetForwarding(request, this);
-//	    String forwardTarget = middleProxy.findWhereIsForwarded(request);
-	    isBlocked = middleProxy.checkIfBlock(request);
+	    Request request2 = middleProxy.checkAndSetForwarding(request, this);
+	    isBlocked = middleProxy.checkIfBlock(request2);
+	    while(middleProxy.findWhereIsForwarded(request2) != null && isBlocked==false ){
+	    	request2 = middleProxy.checkAndSetForwarding(request2, this);
+		    isBlocked = middleProxy.checkIfBlock(request2);   	
+	    }
 	    if (isBlocked) {
-	    	Response response = messageFactory.createResponse(Response.BUSY_HERE, request);	//callee appears unavailable
+	    	Response response = messageFactory.createResponse(Response.BUSY_HERE, request2);	//callee appears unavailable
 	    	if (serverTransaction != null)
 				serverTransaction.sendResponse(response);
 			else
 				sipProvider.sendResponse(response);
 	    	return;
 	    }
-	    
+	    request = request2;
 	    
 
 	

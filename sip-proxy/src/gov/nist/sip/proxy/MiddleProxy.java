@@ -1,7 +1,9 @@
 package gov.nist.sip.proxy;
 
 import java.sql.Connection;
-
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import javax.sip.*;
 import javax.sip.message.*;
@@ -134,12 +136,6 @@ public class MiddleProxy {
 	
 	
 
-			private String getUsernameFromHeader(ToHeader header) {
-				URI uri = header.getAddress().getURI();
-				String uriString = uri.toString();
-				return uriString.substring(uriString.indexOf("sip:") + 4,
-						uriString.indexOf("@"));
-			}
 		 
 				
 			public Request checkAndSetForwarding(Request request, Proxy proxy) {
