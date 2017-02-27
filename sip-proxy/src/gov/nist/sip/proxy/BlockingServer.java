@@ -25,7 +25,7 @@ public class BlockingServer {
 		
 		try {
 			PreparedStatement prep = conn.prepareStatement(existingUser);
-			prep.setString(1, blocker);
+			prep.setString(1, blocked);
 			ResultSet rs = prep.executeQuery();
 			
 			boolean exists = rs.next();
@@ -39,7 +39,7 @@ public class BlockingServer {
 				prep.executeUpdate();
 			}
 			else {
-				throw new WrongUserException("User: " + blocker + " does not exist.");
+				throw new WrongUserException("User: " + blocked + " does not exist.");
 			}
 		}
 		catch (SQLException e) {
@@ -49,11 +49,12 @@ public class BlockingServer {
 	}
 	
 	public void UnblockUser(String blocker, String blocked) throws WrongUserException{
-		String existingUser = "SELECT * FROM users WHERE username=?;";
+		String existingUser = "SELECT * FROM blocking WHERE blocker=? AND blocked=?;";
 		
 		try {
 			PreparedStatement prep = conn.prepareStatement(existingUser);
 			prep.setString(1, blocker);
+			prep.setString(2, blocked);
 			ResultSet rs = prep.executeQuery();
 			
 			boolean exists = rs.next();
@@ -67,7 +68,7 @@ public class BlockingServer {
 				prep.executeUpdate();
 			}
 			else {
-				throw new WrongUserException("User: " + blocker + " does not exist.");
+				throw new WrongUserException("User: " + blocked + " is not blocked.");
 			}
 		}
 		catch (SQLException e) {

@@ -85,28 +85,27 @@ public class MiddleProxy {
 		String sourceUri = getSourceUri(request).toString();
 		String blocker = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
 		byte[] temp = request.getRawContent();
-		String blocked = new String(temp);	
-		boolean isBlocked = blockingServer.getBlock(blocker, blocked);
-		try {
-			blockingServer.BlockUser(blocker, blocked);
+		String temp2 = new String(temp);	
+		String blocked = temp2.substring(0, temp2.indexOf("|"));
+		String whatDo = temp2.substring(temp2.indexOf("|")+1);
+
+		if (whatDo.equals("1")) {
+			try {
+				blockingServer.BlockUser(blocker, blocked);
+			}
+			catch(WrongUserException a){
+				System.out.println(a.getMessage());
+				throw a;
+			}
 		}
-		catch(WrongUserException a){
-			System.out.println(a.getMessage());
-			throw a;
-		}
-	}
-	
-	public void unblock(Request request) throws WrongUserException{
-		String sourceUri = getSourceUri(request).toString();
-		String blocker = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
-		String targetUri = getTargetUri(request).toString();
-		String blocked = targetUri.substring(4, targetUri.lastIndexOf("@"));
-		try {
-			blockingServer.UnblockUser(blocker, blocked);
-		}
-		catch(WrongUserException a){
-			System.out.println(a.getMessage());
-			throw a;
+		else {
+			try {
+				blockingServer.UnblockUser(blocker, blocked);
+			}
+			catch(WrongUserException a){
+				System.out.println(a.getMessage());
+				throw a;
+			}
 		}
 	}
 	

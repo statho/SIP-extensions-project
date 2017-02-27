@@ -804,7 +804,7 @@ public class SipManager
     }
     
     
-    public void block(String publicAddress, String blocked, boolean block) throws CommunicationsException
+    public void block(String publicAddress, String blocked) throws CommunicationsException
     {
         try {
             console.logEntry();

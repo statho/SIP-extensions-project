@@ -454,9 +454,9 @@ public class SipCommunicator implements MediaListener, UserActionListener, Commu
 
 		if (blocked != null && blocker != null) {
 			try {
-				sipManager.block(blocker, blocked, true); // TODO: find a way to
-															// send this to
-															// Proxy
+				blocked = blocked + "|1";
+				sipManager.block(blocker, blocked); 
+															
 			} catch (CommunicationsException e) {
 				console.logExit();
 			}
@@ -464,11 +464,17 @@ public class SipCommunicator implements MediaListener, UserActionListener, Commu
 	}
 
 	public void handleUnblockRequest() {
-		String unblockName = guiManager.getUnblock();
-		String userName = guiManager.getAuthenticationUserName();
+		String blocked = guiManager.getUnblock();
+		String blocker = guiManager.getAuthenticationUserName();
 
-		if (unblockName != null && userName != null) {
-			// TODO: find a way to send this to Proxy
+		if (blocked != null && blocker != null) {
+			try {
+				blocked = blocked + "|0";
+				sipManager.block(blocker, blocked); 
+															
+			} catch (CommunicationsException e) {
+				console.logExit();
+			}
 		}
 	}
 
