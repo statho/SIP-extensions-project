@@ -490,7 +490,20 @@ public class SipCommunicator implements MediaListener, UserActionListener, Commu
 		}
 	}
 	}
-
+	
+	public void handleUnforwardRequest() {
+		String target = guiManager.getUnforward();
+		String source = guiManager.getAuthenticationUserName();
+		if (target != null && source != null) {
+			try {
+			sipManager.unforward(source, target);
+			
+			}catch (CommunicationsException e) {
+			console.logExit();
+		}
+	}
+	}
+	
 	//
 	protected void shutDown() {
 		try {
@@ -884,5 +897,7 @@ public class SipCommunicator implements MediaListener, UserActionListener, Commu
 
 		return SubscriptionAuthorizationResponse.createResponse(response);
 	}
+
+	
 
 }

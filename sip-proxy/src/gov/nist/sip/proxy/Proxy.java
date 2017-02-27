@@ -534,7 +534,27 @@ public class Proxy implements SipListener  {
  				return;
               }
 
-
+             if ( request.getMethod().equals(Request.INFO) ) {	//TODO: create a request for this
+  				if (ProxyDebug.debug) 
+  			        	ProxyDebug.println("Incoming request Unforward");
+                  try{
+                 	middleProxy.unforward(request);
+                  }
+                  catch(WrongUserException2 a){
+                  	Response response=messageFactory.createResponse
+                              (Response.DECLINE,request);
+                  	return;
+          		}
+                 Response response = messageFactory.createResponse(Response.OK, request);
+                 if (serverTransaction != null)
+     				serverTransaction.sendResponse(response);
+     			else
+     				sipProvider.sendResponse(response);
+  				return;
+               }
+             
+             
+             
 	     /* If we receive a subscription targeted to a user that
 	      * is publishing its state here, send to presence server
 	      */

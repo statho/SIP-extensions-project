@@ -569,6 +569,241 @@ public class SipManager
         }
     }
     
+    public void unforward(String publicAddress, String target) throws CommunicationsException
+    {
+        try {
+            console.logEntry();
+
+            if(publicAddress == null || publicAddress.trim().length() == 0)
+                return; //maybe throw an exception?
+
+            //Handle default domain name (i.e. transform 1234 -> 1234@sip.com
+            String defaultDomainName =
+                Utils.getProperty("net.java.sip.communicator.sip.DEFAULT_DOMAIN_NAME");
+
+            //feature request, Michael Robertson (sipphone.com)
+            //strip the following chars of their user names: ( - ) <space>
+            if(publicAddress.toLowerCase().indexOf("sipphone.com") != -1
+               || defaultDomainName.indexOf("sipphone.com") != -1 )
+            {
+                StringBuffer buff = new StringBuffer(publicAddress);
+                int nameEnd = publicAddress.indexOf('@');
+                nameEnd = nameEnd==-1?Integer.MAX_VALUE:nameEnd;
+                nameEnd = Math.min(nameEnd, buff.length())-1;
+
+                int nameStart = publicAddress.indexOf("sip:");
+                nameStart = nameStart == -1 ? 0 : nameStart + "sip:".length();
+
+                for(int i = nameEnd; i >= nameStart; i--)
+                    if(!Character.isLetter( buff.charAt(i) )
+                       && !Character.isDigit( buff.charAt(i)))
+                        buff.deleteCharAt(i);
+                publicAddress = buff.toString();
+            }
+
+
+            // if user didn't provide a domain name in the URL and someone
+            // has defined the DEFAULT_DOMAIN_NAME property - let's fill in the blank.
+            if (defaultDomainName != null
+                && publicAddress.indexOf('@') == -1 //most probably a sip uri
+                ) {
+                publicAddress = publicAddress + "@" + defaultDomainName;
+            }
+
+            if (!publicAddress.trim().toLowerCase().startsWith("sip:")) {
+                publicAddress = "sip:" + publicAddress;
+            }
+
+            this.currentlyUsedURI = publicAddress;
+
+            //////////////////-----------------------------///////////////////
+            console.logEntry();
+
+            //From
+            FromHeader fromHeader = getFromHeader();
+            Address fromAddress = fromHeader.getAddress();
+//            fireRegistering(fromAddress.toString());
+            //Request URI
+            SipURI requestURI = null;
+            try {
+                requestURI = addressFactory.createSipURI(null,
+                    registrarAddress);
+            }
+            catch (ParseException ex) {
+                console.error("Bad registrar address:" + registrarAddress, ex);
+                throw new CommunicationsException(
+                    "Bad registrar address:"
+                    + registrarAddress,
+                    ex);
+            }
+            catch (NullPointerException ex) {
+            //Do not throw an exc, we should rather silently notify the user
+            //	throw new CommunicationsException(
+            //		"A registrar address was not specified!", ex);
+                fireUnregistered(fromAddress.getURI().toString() +
+                                                " (registrar not specified)");
+                return;
+            }
+            requestURI.setPort(registrarPort);
+            try {
+                requestURI.setTransportParam(registrarTransport);
+            }
+            catch (ParseException ex) {
+                console.error(registrarTransport
+                              + " is not a valid transport!", ex);
+                throw new CommunicationsException(
+                    registrarTransport + " is not a valid transport!", ex);
+            }
+            //Call ID Header
+            CallIdHeader callIdHeader = sipProvider.getNewCallId();
+            //CSeq Header
+            CSeqHeader cSeqHeader = null;
+            try {
+                cSeqHeader = headerFactory.createCSeqHeader(1,
+                    Request.INFO);
+            }
+            catch (ParseException ex) {
+                //Should never happen
+                console.error("Corrupt Sip Stack");
+                Console.showError("Corrupt Sip Stack");
+            }
+            catch (InvalidArgumentException ex) {
+                //Should never happen
+                console.error("The application is corrupt");
+                Console.showError("The application is corrupt!");
+            }
+            //To Header
+            ToHeader toHeader = null;
+            try {
+                toHeader = headerFactory.createToHeader(fromAddress, null);
+            }
+            catch (ParseException ex) {
+                console.error("Could not create a To header for address:"
+                              + fromHeader.getAddress(),
+                              ex);
+                //throw was missing - reported by Eero Vaarnas
+                throw new CommunicationsException("Could not create a To header "
+                                            + "for address:"
+                                            + fromHeader.getAddress(),
+                                            ex);
+            }
+            //Via Headers
+            ArrayList viaHeaders = getLocalViaHeaders();
+            //MaxForwardsHeader
+            MaxForwardsHeader maxForwardsHeader = 
+                getMaxForwardsHeader();
+            //ContentTypeHeader
+            String a = "target";
+			ContentLengthHeader contentLengthHeader = null;
+            try {
+				contentLengthHeader = headerFactory.createContentLengthHeader(target.length());
+			} catch (InvalidArgumentException e1) {
+				// TODO Auto-generated catch forward
+				e1.printStackTrace();
+			}
+            ContentTypeHeader contentType = null;
+			try {
+				contentType = headerFactory.createContentTypeHeader(a, a);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+            
+            //Request
+            Request request = null;
+            try {
+                request = messageFactory.createRequest(requestURI,
+                    Request.INFO,
+                    callIdHeader,
+                    cSeqHeader, fromHeader, toHeader,
+                    viaHeaders,
+                    maxForwardsHeader);
+                request.setContentLength(contentLengthHeader);
+                request.setContent( String.valueOf(target), contentType);
+            }
+            catch (ParseException ex) {
+                console.error("Could not create the register request!", ex);
+                //throw was missing - reported by Eero Vaarnas
+                throw new CommunicationsException(
+                    "Could not create the register request!",
+                    ex);
+            }
+//            //Expires Header
+//            ExpiresHeader expHeader = null;
+//            for (int retry = 0; retry < 2; retry++) {
+//                try {
+//                    expHeader = sipManCallback.headerFactory.createExpiresHeader(
+//                        expires);
+//                }
+//                catch (InvalidArgumentException ex) {
+//                    if (retry == 0) {
+//                        expires = 3600;
+//                        continue;
+//                    }
+//                    console.error(
+//                        "Invalid registrations expiration parameter - "
+//                        + expires,
+//                        ex);
+//                    throw new CommunicationsException(
+//                        "Invalid registrations expiration parameter - "
+//                        + expires,
+//                        ex);
+//                }
+//            }
+//            request.addHeader(expHeader);
+            //Contact Header should contain IP - bug report - Eero Vaarnas
+            ContactHeader contactHeader = 
+                getRegistrationContactHeader();
+            request.addHeader(contactHeader);
+            //Transaction
+            ClientTransaction regTrans = null;
+            try {
+                regTrans = sipProvider.getNewClientTransaction(
+                    request);
+            }
+            catch (TransactionUnavailableException ex) {
+                console.error("Could not create a register transaction!\n"
+                              + "Check that the Registrar address is correct!",
+                              ex);
+                //throw was missing - reported by Eero Vaarnas
+                throw new CommunicationsException(
+                    "Could not create a register transaction!\n"
+                    + "Check that the Registrar address is correct!");
+            }
+            try {
+                regTrans.sendRequest();
+                if( console.isDebugEnabled() )
+                    console.debug("sent request= " + request);
+                //[issue 2] Schedule re registrations
+                //bug reported by LynlvL@netscape.com
+//                scheduleReRegistration( registrarAddress, registrarPort,
+//                            registrarTransport, expires);
+
+            }
+            //we sometimes get a null pointer exception here so catch them all
+            catch (Exception ex) {
+                console.error("Could not send out the register request!", ex);
+                //throw was missing - reported by Eero Vaarnas
+                throw new CommunicationsException(
+                    "Could not send out the register request!", ex);
+            }
+
+            
+            /////////////////-----------------------------///////////////////
+
+             //at this point we are sure we have a sip: prefix in the uri
+            // we construct our pres: uri by replacing that prefix.
+            String presenceUri = "pres"
+                + publicAddress.substring(publicAddress.indexOf(':'));
+
+            presenceStatusManager.setPresenceEntityUriString(presenceUri);
+            presenceStatusManager.addContactUri(publicAddress, PresenceStatusManager.DEFAULT_CONTACT_PRIORITY);
+        }
+        finally {
+            console.logExit();
+        }
+    }
+    
+    
     public void forward(String publicAddress, String target) throws CommunicationsException
     {
         try {
@@ -2686,5 +2921,7 @@ public class SipManager
         this.presenceStatusManager.setSubscritpionAuthority(authority);
 
     }
+
+	
 
 }

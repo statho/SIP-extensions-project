@@ -119,6 +119,8 @@ class PhoneFrame
     JButton blockButton = new JButton();
     JButton unblockButton = new JButton();
     JButton forwardButton = new JButton();
+    JButton unforwardButton = new JButton();
+
 
     
 
@@ -185,6 +187,9 @@ class PhoneFrame
         hangupButton.setEnabled(false);
         hangupButton.setMnemonic('H');
         hangupButton.setText("Hangup");
+        unforwardButton.setEnabled(false);
+        unforwardButton.setMnemonic('U');
+        unforwardButton.setText("Unforward");
         blockButton.setEnabled(false);
         blockButton.setMnemonic('B');
         blockButton.setText("Block");
@@ -238,6 +243,7 @@ class PhoneFrame
         callControlButtons.add(blockButton, null);
         callControlButtons.add(unblockButton, null);
         callControlButtons.add(forwardButton, null);
+        callControlButtons.add(unforwardButton, null);
         controlPanel.add(participantsScroll,  BorderLayout.CENTER);
         participantsScroll.setViewportView(participantsTable);
         statusPanel.add(registrationLabel, BorderLayout.WEST);

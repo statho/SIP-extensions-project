@@ -63,7 +63,33 @@ public class ForwardingServer {
 		}
 	}
 	
-	
+	public void UnforwardUser(String source, String target) throws WrongUserException2{
+		String existingUser = "SELECT * FROM users WHERE username=?;";
+		
+		try {
+			PreparedStatement prep = conn.prepareStatement(existingUser);
+			prep.setString(1, source);
+			ResultSet rs = prep.executeQuery();
+			
+			boolean exists = rs.next();
+			
+			if(exists){	
+					String deleteQ = "DELETE FROM forwarding WHERE source=? AND target=?;";
+					prep = conn.prepareStatement(deleteQ);
+					prep.setString(1, source);
+					prep.setString(2, target);
+					System.out.println(prep);
+					prep.executeUpdate();
+					}
+			else {
+				throw new WrongUserException2("User: " + source + " does not exist.");
+			}
+		}
+		catch (SQLException e) {
+        	e.printStackTrace();
+        	
+		}
+	}
 	
 	public String getForwardingTarget(String source){
 		String forwardCheck = "SELECT target FROM forwarding where source = ?";

@@ -97,6 +97,20 @@ public class MiddleProxy {
 		}
 	}
 	
+	public void unforward(Request request) throws WrongUserException2{
+		String sourceUri = getSourceUri(request).toString();
+		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		byte[] temp = request.getRawContent();
+		String target = new String(temp);		
+		try {
+			forwardingServer.UnforwardUser(source, target);
+		}
+		catch(WrongUserException2 a){
+			System.out.println(a.getMessage());
+			throw a;
+		}
+	}
+	
 	
 	public void block(Request request) throws WrongUserException{
 		String sourceUri = getSourceUri(request).toString();

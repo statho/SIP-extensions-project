@@ -76,6 +76,8 @@ public interface UserActionListener
     public void handleHangupRequest(UserCallControlEvent evt);
 
     public void handleAnswerRequest(UserCallControlEvent evt);
+    
+
 
     public void handleExitRequest();
     
@@ -85,6 +87,9 @@ public interface UserActionListener
     public void handleUnblockRequest();
     
     public void handleForwardRequest();
+    
+    public void handleUnforwardRequest();
+
     //
     
 /** @todo remove after testing */

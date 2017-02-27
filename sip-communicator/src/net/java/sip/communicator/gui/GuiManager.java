@@ -120,8 +120,9 @@ public class GuiManager
     MySipphoneAction mySipphoneAction = null;
     private AuthenticationSplash authenticationSplash = null;
     private BlockSplash blockSplash = null;
-    private ForwardSplash forwardSplash = null;
     private UnblockSplash unblockSplash = null;
+    private ForwardSplash forwardSplash = null;
+    private UnforwardSplash unforwardSplash = null;
     private RegistrationSplash registrationSplash = null;
     
     static boolean isThisSipphoneAnywhere = false;
@@ -286,6 +287,8 @@ public class GuiManager
         phoneFrame.blockButton.setEnabled(enabled);
         phoneFrame.unblockButton.setEnabled(enabled);
         phoneFrame.forwardButton.setEnabled(enabled);
+        phoneFrame.unforwardButton.setEnabled(enabled);
+
     }
 
     public void addUserActionListener(UserActionListener l)
@@ -661,6 +664,14 @@ public class GuiManager
             }
         });
         
+        phoneFrame.unforwardButton.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent evt)
+            {
+                unforwardButton_actionPerformed(evt);
+            }
+        });
+        
         phoneFrame.addWindowListener(new WindowAdapter()
         {
             public void windowClosing(WindowEvent evt)
@@ -718,6 +729,18 @@ public class GuiManager
             ( (UserActionListener) listeners.get(i)).handleBlockRequest();
         }
     }
+    
+    
+    void unblockButton_actionPerformed(ActionEvent evt) {
+    	if (unblockSplash != null) 
+    		unblockSplash.dispose();
+    	unblockSplash = new UnblockSplash(phoneFrame, true);
+    	unblockSplash.show();
+        for (int i = listeners.size() - 1; i >= 0; i--) {
+            ( (UserActionListener) listeners.get(i)).handleUnblockRequest();
+        }
+    }
+    
     void forwardButton_actionPerformed(ActionEvent evt) {
     	if (forwardSplash != null) 
     		forwardSplash.dispose();
@@ -728,13 +751,13 @@ public class GuiManager
         }
     }
     
-    void unblockButton_actionPerformed(ActionEvent evt) {
-    	if (unblockSplash != null) 
-    		unblockSplash.dispose();
-    	unblockSplash = new UnblockSplash(phoneFrame, true);
-    	unblockSplash.show();
+    void unforwardButton_actionPerformed(ActionEvent evt) {
+    	if (unforwardSplash != null) 
+    		unforwardSplash.dispose();
+    	unforwardSplash = new UnforwardSplash(phoneFrame, true);
+    	unforwardSplash.show();
         for (int i = listeners.size() - 1; i >= 0; i--) {
-            ( (UserActionListener) listeners.get(i)).handleUnblockRequest();
+            ( (UserActionListener) listeners.get(i)).handleUnforwardRequest();
         }
     }
 
@@ -749,6 +772,10 @@ public class GuiManager
     
     public String getForward(){
     	return forwardSplash.forwarded;
+    }
+    
+    public String getUnforward(){
+    	return unforwardSplash.unforwarded;
     }
     
     public String getAuthenticationUserName()
