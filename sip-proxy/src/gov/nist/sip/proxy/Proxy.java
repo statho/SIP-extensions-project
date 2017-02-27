@@ -622,18 +622,6 @@ public class Proxy implements SipListener  {
 		return;
 	    }
 	    
-	    String forwardTarget = middleProxy.findWhereIsForwarded(request);
-	    if (forwardTarget != null){
-	    	Response response = messageFactory.createResponse(Response.CALL_IS_BEING_FORWARDED, request);	//callee appears unavailable
-	    	if (serverTransaction != null)
-				serverTransaction.sendResponse(response);
-			else
-				sipProvider.sendResponse(response);
-	    	return;
-	    }
-	    
-	    
-	    
 	    //NEW: Blocking check and response
 	    boolean isBlocked = middleProxy.checkIfBlock(request);
 	    if (isBlocked) {
@@ -644,6 +632,20 @@ public class Proxy implements SipListener  {
 				sipProvider.sendResponse(response);
 	    	return;
 	    }
+	    
+	    request = middleProxy.checkAndSetForwarding(request, this);
+//	    String forwardTarget = middleProxy.findWhereIsForwarded(request);
+	    isBlocked = middleProxy.checkIfBlock(request);
+	    if (isBlocked) {
+	    	Response response = messageFactory.createResponse(Response.BUSY_HERE, request);	//callee appears unavailable
+	    	if (serverTransaction != null)
+				serverTransaction.sendResponse(response);
+			else
+				sipProvider.sendResponse(response);
+	    	return;
+	    }
+	    
+	    
 
 	
 	     // Forward to next hop but dont reply OK right away for the

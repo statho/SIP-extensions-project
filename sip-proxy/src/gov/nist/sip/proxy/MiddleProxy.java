@@ -131,4 +131,44 @@ public class MiddleProxy {
 		String forwardTarget = forwardingServer.getForwardingTarget(source);
 		return forwardTarget;
 	}
+	
+	
+
+			private String getUsernameFromHeader(ToHeader header) {
+				URI uri = header.getAddress().getURI();
+				String uriString = uri.toString();
+				return uriString.substring(uriString.indexOf("sip:") + 4,
+						uriString.indexOf("@"));
+			}
+		 
+				
+			public Request checkAndSetForwarding(Request request, Proxy proxy) {
+
+				ToHeader header = (ToHeader) request.getHeader(ToHeader.NAME);
+//				String oldToUser = getUsernameFromHeader(header);
+//				String toUser = dbManager.getForward(oldToUser);
+				String toUser = this.findWhereIsForwarded(request);
+				if (toUser != null) {
+					String originalUri = header.getAddress().toString();
+					String newUri = "sip:" + toUser
+							+ originalUri.substring(originalUri.indexOf("@"));
+					URI newURI;
+					try {
+						newURI = proxy.getAddressFactory().createURI(newUri);
+						ToHeader newTo = proxy.getHeaderFactory().createToHeader(
+								proxy.getAddressFactory().createAddress(newURI), null);
+						Request newreq = (Request) request.clone();
+						newreq.setHeader(newTo);
+						return newreq;
+
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				} else
+					return request;
+				
+				return null;
+			}
 }
