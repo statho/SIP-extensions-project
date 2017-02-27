@@ -70,21 +70,28 @@ public class MiddleProxy {
 	
 	
 	public void startBilling(Request request){
+		
 		String sourceUri = getSourceUri(request).toString();
 		String caller = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		
 		billingServer.begin(caller);
 	}
 	
 	
 	public void stopBilling(Request request){
+		
 		String sourceUri = getSourceUri(request).toString();
 		String caller = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
-		billingServer.end(caller);
+		String targetUri = getTargetUri(request).toString();
+		String callee = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		
+		billingServer.end(caller, callee);
 	}
 
 	public void forward(Request request) throws WrongUserException2{
 		String sourceUri = getSourceUri(request).toString();
 		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		
 		byte[] temp = request.getRawContent();
 		String target = new String(temp);		
 		//String getForwardingTarget = forwardingServer.getForwardingTarget(source);

@@ -93,33 +93,46 @@ public class BillingServer {
 		
 	}
 	
-	public void end(String caller) {
-		
-		String existingUser = "SELECT * FROM billing WHERE caller=?;";
-		
+	public void end(String caller, String callee) {
 		
 		try{
+			String existingUser = "SELECT * FROM billing WHERE caller=?;";
+		
 			PreparedStatement prep = conn.prepareStatement(existingUser);
 			prep.setString(1, caller);
 			ResultSet rs = prep.executeQuery();
 			
-			boolean exists = rs.next();
+			System.out.println("Caller: " + caller);
+			System.out.println("Callee: " + callee);
 			
-			if(exists){	
+			boolean exists = rs.next();
+			long startTime;
+			
+			if(!exists){
+				rs.close();
 				
-				long startTime = rs.getLong("start_time");
-				float elapsedTime = (float) (System.currentTimeMillis() - startTime) / 1000;     //elapsed time in seconds
+				caller = callee;
+				prep = conn.prepareStatement(existingUser);
+				prep.setString(1, caller);
+				ResultSet rs1 = prep.executeQuery();
+				rs1.next();
+				startTime = rs1.getLong("start_time");
 				
-				String billingQ = "DELETE FROM billing WHERE caller=?";
-				prep = conn.prepareStatement(billingQ);
-				prep.setString(1, caller);			//starting time in mseconds
-				System.out.println(prep);
-				prep.executeUpdate();
-				System.out.println(elapsedTime);
-				charge(caller, elapsedTime);
+				rs1.close();
 			}
 			else
-				return;
+				startTime = rs.getLong("start_time");
+			
+			float elapsedTime = (float) (System.currentTimeMillis() - startTime) / 1000;     //elapsed time in seconds
+			
+			String billingQ = "DELETE FROM billing WHERE caller=?";
+			prep = conn.prepareStatement(billingQ);
+			prep.setString(1, caller);			//starting time in mseconds
+			System.out.println(prep);
+			prep.executeUpdate();
+			System.out.println(elapsedTime);
+			charge(caller, elapsedTime);
+			
 		}
 		catch (SQLException e) {
         	e.printStackTrace();
