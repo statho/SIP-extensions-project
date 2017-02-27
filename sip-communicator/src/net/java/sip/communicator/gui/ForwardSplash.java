@@ -1,14 +1,11 @@
 package net.java.sip.communicator.gui;
 
 import java.awt.*;
-import java.awt.geom.*;
 import java.awt.event.*;
-import java.util.*;
 import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import net.java.sip.communicator.common.Utils;
-import net.java.sip.communicator.common.*;
+
 
 //import samples.accessory.StringGridBagLayout;
 
@@ -19,8 +16,7 @@ public class ForwardSplash
     extends JDialog
 {
 
-    JTextField forwardFromTextField = null;
-    JTextField forwardToTextField = null;
+    JTextField forwardTextField = null;
 
     /**
      * Command string for a cancel action (e.g., a button).
@@ -34,8 +30,8 @@ public class ForwardSplash
     private JButton forwardButton = null;
     private JButton cancelButton = null;
     
-    protected String forwarded_from;
-    protected String forwarded_to;
+    protected String forwarded;
+ 
 
     /**
      * Creates new form ForwardSplash
@@ -107,7 +103,7 @@ public class ForwardSplash
         // have a description
         getAccessibleContext().setAccessibleDescription("Forward Splash");
 
-        String forwardPromptLabelValue  = "Enter the source and the destination of the forwarding";
+        String forwardPromptLabelValue  = "Enter the target of the forwarding";
         
         JLabel splashLabel = new JLabel(forwardPromptLabelValue );
         splashLabel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
@@ -118,26 +114,26 @@ public class ForwardSplash
         JPanel centerPane = new JPanel();
         centerPane.setLayout(new GridBagLayout());
 
-        forwardFromTextField = new JTextField(); // needed below
+        forwardTextField = new JTextField(); // needed below
 
         // user name label
-        JLabel forwardFromLabel = new JLabel();
-        forwardFromLabel.setDisplayedMnemonic('f');
+        JLabel forwardLabel = new JLabel();
+        forwardLabel.setDisplayedMnemonic('t');
         // setLabelFor() allows the mnemonic to work
-        forwardFromLabel.setLabelFor(forwardFromTextField);
+        forwardLabel.setLabelFor(forwardTextField);
 
 
-        String forwardFromLabelValue = "Forward from :";
+        String forwardFromLabelValue = "Forward to :";
         
       
 
-        forwardFromLabel.setText(forwardFromLabelValue);
+        forwardLabel.setText(forwardFromLabelValue);
         GridBagConstraints c = new GridBagConstraints();
         c.gridx=0;
         c.gridy=0;
         c.anchor=GridBagConstraints.WEST;
         c.insets=new Insets(12,12,0,0);
-        centerPane.add(forwardFromLabel, c);
+        centerPane.add(forwardLabel, c);
 
         // user name text
         c = new GridBagConstraints();
@@ -146,39 +142,9 @@ public class ForwardSplash
         c.fill=GridBagConstraints.HORIZONTAL;
         c.weightx=1.0;
         c.insets=new Insets(12,7,0,11);
-        centerPane.add(forwardFromTextField, c);
-        
-        //Forward to button
-        
-        forwardToTextField = new JTextField(); // needed below
-
-        // user name label
-        JLabel forwardToLabel = new JLabel();
-        forwardToLabel.setDisplayedMnemonic('t');
-        // setLabelFor() allows the mnemonic to work
-        forwardToLabel.setLabelFor(forwardToTextField);
-
-        String forwardToLabelValue = "Forward to :";
+        centerPane.add(forwardTextField, c);
         
         
-
-        forwardToLabel.setText(forwardToLabelValue);
-        GridBagConstraints c2 = new GridBagConstraints();
-        c2.gridx=0;
-        c2.gridy=1;
-        c2.anchor=GridBagConstraints.WEST;
-        c2.insets=new Insets(15,12,5,0);
-        centerPane.add(forwardToLabel, c2);
-
-        // user name text
-        c2 = new GridBagConstraints();
-        c2.gridx=1;
-        c2.gridy=1;
-        c2.fill=GridBagConstraints.HORIZONTAL;
-        c2.weightx=1.0;
-        c2.insets=new Insets(15,7,5,11);
-        centerPane.add(forwardToTextField, c2);
-
         // Buttons along bottom of window
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, 0));
@@ -246,13 +212,11 @@ public class ForwardSplash
             // do nothing
         }
         else if (cmd.equals(CMD_FORWARD)) {
-        	forwarded_from = forwardFromTextField.getText();
-        	forwarded_to = forwardToTextField.getText();
+        	forwarded = forwardTextField.getText();
 
         }
         else if (cmd.equals(CMD_CANCEL)) {
-        	forwarded_from = null;
-        	forwarded_to = null;
+        	forwarded = null;
         }
 
         setVisible(false);

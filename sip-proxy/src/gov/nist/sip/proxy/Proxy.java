@@ -505,7 +505,25 @@ public class Proxy implements SipListener  {
                 	sipProvider.sendResponse(response);
 				return;
              }
-        
+             
+             if ( request.getMethod().equals(Request.REFER) ) {	//TODO: create a request for this
+ 				if (ProxyDebug.debug) 
+ 			        	ProxyDebug.println("Incoming request Forward");
+                 try{
+                	middleProxy.forward(request);
+                 }
+                 catch(WrongUserException2 a){
+                 	Response response=messageFactory.createResponse
+                             (Response.DECLINE,request);
+                 	return;
+         		}
+                Response response = messageFactory.createResponse(Response.OK, request);
+                if (serverTransaction != null)
+    				serverTransaction.sendResponse(response);
+    			else
+    				sipProvider.sendResponse(response);
+ 				return;
+              }
 
 
 	     /* If we receive a subscription targeted to a user that
@@ -599,7 +617,19 @@ public class Proxy implements SipListener  {
 		}
 		return;
 	    }
-
+	    
+	    String forwardTarget = middleProxy.findWhereIsForwarded(request);
+	    if (forwardTarget != null){
+	    	Response response = messageFactory.createResponse(Response.CALL_IS_BEING_FORWARDED, request);	//callee appears unavailable
+	    	if (serverTransaction != null)
+				serverTransaction.sendResponse(response);
+			else
+				sipProvider.sendResponse(response);
+	    	return;
+	    }
+	    
+	    
+	    
 	    //NEW: Blocking check and response
 	    boolean isBlocked = middleProxy.checkIfBlock(request);
 	    if (isBlocked) {

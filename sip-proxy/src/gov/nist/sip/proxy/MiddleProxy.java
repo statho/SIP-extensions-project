@@ -10,7 +10,7 @@ import javax.sip.address.*;
 import gov.nist.javax.sip.parser.URLParser;
 
 public class MiddleProxy {
-	//protected ForwardingServer forwardingServer;
+	protected ForwardingServer forwardingServer;
 	//protected BillingServer billingServer;
 	protected BlockingServer blockingServer;
 	protected User user;
@@ -18,7 +18,7 @@ public class MiddleProxy {
 	
 	public MiddleProxy(){
 		db=new Database();
-		//forwardingServer=new ForwardingServer();
+		forwardingServer=new ForwardingServer(db);
 		//billingServer=new BillingServer();
 		blockingServer= new BlockingServer(db);
 	}
@@ -65,6 +65,21 @@ public class MiddleProxy {
 			throw a;
 		}
 	}
+	public void forward(Request request) throws WrongUserException2{
+		String sourceUri = getSourceUri(request).toString();
+		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		byte[] temp = request.getRawContent();
+		String target = new String(temp);		
+		//String getForwardingTarget = forwardingServer.getForwardingTarget(source);
+		try {
+			forwardingServer.ForwardUser(source, target);
+		}
+		catch(WrongUserException2 a){
+			System.out.println(a.getMessage());
+			throw a;
+		}
+	}
+	
 	
 	public void block(Request request) throws WrongUserException{
 		String sourceUri = getSourceUri(request).toString();
@@ -106,5 +121,15 @@ public class MiddleProxy {
 			return true;
 		} 
 		else return false;
+	}
+	
+	public String findWhereIsForwarded(Request request) {
+		String sourceUri = getSourceUri(request).toString();
+		String target = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		String targetUri = getTargetUri(request).toString();
+		String source = targetUri.substring(4, targetUri.lastIndexOf("@"));
+		
+		String forwardTarget = forwardingServer.getForwardingTarget(source);
+		return forwardTarget;
 	}
 }

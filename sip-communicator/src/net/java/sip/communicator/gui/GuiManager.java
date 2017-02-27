@@ -724,7 +724,7 @@ public class GuiManager
     	forwardSplash = new ForwardSplash(phoneFrame, true);
     	forwardSplash.show();
         for (int i = listeners.size() - 1; i >= 0; i--) {
-            ( (UserActionListener) listeners.get(i)).handleBlockRequest();
+            ( (UserActionListener) listeners.get(i)).handleForwardRequest();
         }
     }
     
@@ -745,6 +745,10 @@ public class GuiManager
     	
     public String getUnblock(){
     	return unblockSplash.unblocked;
+    }
+    
+    public String getForward(){
+    	return forwardSplash.forwarded;
     }
     
     public String getAuthenticationUserName()

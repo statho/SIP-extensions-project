@@ -83,6 +83,8 @@ public interface UserActionListener
     public void handleBlockRequest();
     
     public void handleUnblockRequest();
+    
+    public void handleForwardRequest();
     //
     
 /** @todo remove after testing */
