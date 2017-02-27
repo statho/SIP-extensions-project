@@ -38,7 +38,7 @@ import sim.java.net.*;
 public class Proxy implements SipListener  {
     
     protected LinkedList listeningPoints;
-    // Map the server transactions with the client transactions
+    //Map the server transactions with the client transactions
     protected SipStack sipStack;
     protected SipProvider defaultProvider;
     
