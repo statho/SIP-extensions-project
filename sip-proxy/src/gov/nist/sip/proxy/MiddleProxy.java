@@ -58,11 +58,7 @@ public class MiddleProxy {
 			else
 				user = new User(source, password, db);
 		}
-		catch(WrongPasswordException a){
-			System.out.println(a.getMessage());
-			throw a;
-		}
-		catch(NotUserException a){
+		catch(RegistrationException a){
 			System.out.println(a.getMessage());
 			throw a;
 		}

@@ -469,14 +469,14 @@ public class Proxy implements SipListener  {
                 try{
                 	middleProxy.register(request);
                 }
-                catch(WrongPasswordException a){
+                catch(RegistrationException a){
                 	Response response=messageFactory.createResponse
-                            (Response.DECLINE,request);
-                	return;
-        		}
-                catch(NotUserException a){
-                	Response response=messageFactory.createResponse
-                            (Response.DECLINE,request);
+                            (Response.BAD_REQUEST,request);
+                	response.setReasonPhrase(a.getMessage());
+                    if (serverTransaction != null)
+                    	serverTransaction.sendResponse(response);
+                    else
+                    	sipProvider.sendResponse(response);
                 	return;
         		}
                 // we call the RegisterProcessing:
