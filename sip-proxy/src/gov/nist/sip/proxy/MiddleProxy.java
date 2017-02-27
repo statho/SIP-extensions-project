@@ -13,7 +13,7 @@ import gov.nist.javax.sip.parser.URLParser;
 
 public class MiddleProxy {
 	protected ForwardingServer forwardingServer;
-	//protected BillingServer billingServer;
+	protected BillingServer billingServer;
 	protected BlockingServer blockingServer;
 	protected User user;
 	protected Database db;
@@ -21,7 +21,7 @@ public class MiddleProxy {
 	public MiddleProxy(){
 		db=new Database();
 		forwardingServer=new ForwardingServer(db);
-		//billingServer=new BillingServer();
+		billingServer=new BillingServer(db);
 		blockingServer= new BlockingServer(db);
 	}
 	
@@ -67,6 +67,21 @@ public class MiddleProxy {
 			throw a;
 		}
 	}
+	
+	
+	public void startBilling(Request request){
+		String sourceUri = getSourceUri(request).toString();
+		String caller = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		billingServer.begin(caller);
+	}
+	
+	
+	public void stopBilling(Request request){
+		String sourceUri = getSourceUri(request).toString();
+		String caller = sourceUri.substring(4, sourceUri.lastIndexOf("@"));
+		billingServer.end(caller);
+	}
+
 	public void forward(Request request) throws WrongUserException2{
 		String sourceUri = getSourceUri(request).toString();
 		String source = sourceUri.substring(4, sourceUri.lastIndexOf("@"));

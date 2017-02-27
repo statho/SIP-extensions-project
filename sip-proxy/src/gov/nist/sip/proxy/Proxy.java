@@ -239,6 +239,11 @@ public class Proxy implements SipListener  {
                     " targeted for the proxy, we ignore it");
                     return;
                 }
+                
+                /* ------- ADDED ------------ */
+                  
+                middleProxy.startBilling(request);
+                  
             }
             
            
@@ -660,6 +665,13 @@ public class Proxy implements SipListener  {
 			("Proxy, null server transactin for BYE");
 		  return;
 		}
+	    
+	     
+	    /* ------ ADDED ------ */
+	     
+	    middleProxy.stopBilling(request);
+	     
+	    
 		Dialog d = serverTransaction.getDialog();
 		TransactionsMapping transactionsMapping = 
 			(TransactionsMapping) d.getApplicationData();
