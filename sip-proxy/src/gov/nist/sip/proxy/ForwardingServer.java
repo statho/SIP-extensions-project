@@ -31,13 +31,28 @@ public class ForwardingServer {
 			boolean exists = rs.next();
 			
 			if(exists){	
-				String forwardQ = "INSERT INTO forwarding(source, target) VALUES(?, ?);";
-				prep = conn.prepareStatement(forwardQ);
-				prep.setString(1, source);
-				prep.setString(2, target);
-				System.out.println(prep);
-				prep.executeUpdate();
-			}
+				String sourceExists = "SELECT * FROM forwarding WHERE source=?;";
+				PreparedStatement prep2 = conn.prepareStatement(sourceExists);
+				prep2.setString(1, source);
+				ResultSet rs2 = prep2.executeQuery();
+				boolean exists2 = rs2.next();
+				if (!exists2){
+					String forwardQ = "INSERT INTO forwarding(source, target) VALUES(?, ?);";
+					prep = conn.prepareStatement(forwardQ);
+					prep.setString(1, source);
+					prep.setString(2, target);
+					System.out.println(prep);
+					prep.executeUpdate();
+				}
+				else{
+					String updateQ = "UPDATE forwarding SET target=? WHERE source=?;";
+					prep = conn.prepareStatement(updateQ);
+					prep.setString(2, source);
+					prep.setString(1, target);
+					System.out.println(prep);
+					prep.executeUpdate();
+				}
+				}
 			else {
 				throw new WrongUserException2("User: " + source + " does not exist.");
 			}
