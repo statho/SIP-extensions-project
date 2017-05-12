@@ -86,7 +86,7 @@ public class User {
 				boolean isinserted = rs.next();
 				
 				if(!isinserted){
-					String registerQ = "INSERT INTO users(username, password, policy, creditCardNo) VALUES(?, ?, ?, ?);";
+					String registerQ = "INSERT INTO users(username, password, policy, creditCardNo, charge) VALUES(?, ?, ?, ?, 0.0);";
 					prep = conn.prepareStatement(registerQ);
 					prep.setString(1, username);
 					prep.setString(2, password);
